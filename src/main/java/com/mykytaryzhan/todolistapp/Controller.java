@@ -4,6 +4,8 @@ import datamodel.TodoData;
 import datamodel.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -29,10 +31,12 @@ private Label deadLineLabel;
     private ListView<TodoItem> todoListView;
 @FXML
 private BorderPane mainBorderPane;
-
+@FXML
+private ContextMenu listContextMenu;
 int i = 0;
 
     public void initialize(){
+
 //        TodoItem item1 = new TodoItem("Mail birthday card", "Buy a 30th birthday card for john",
 //                LocalDate.of(2016, Month.APRIL, 25));
 //        TodoItem item2 = new TodoItem("Doctor's appointment", "See dr.Smith at 123 Main St.",
@@ -50,7 +54,17 @@ int i = 0;
 //        todoItems.add(item4);
 //
 //        TodoData.getInstance().setTodoItems(todoItems);
+        listContextMenu = new ContextMenu();
+        MenuItem deleteMenuItem = new MenuItem("Delete");
+        deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TodoItem item = todoListView.getSelectionModel().getSelectedItem();
+                deleteItem(item);
+            }
+        });
 
+        listContextMenu.getItems().addAll(deleteMenuItem);
         todoListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TodoItem>() {
             @Override
             public void changed(ObservableValue<? extends TodoItem> observableValue, TodoItem todoItem, TodoItem t1) {
@@ -86,6 +100,14 @@ int i = 0;
                             System.out.println("Update happened" + item);
                         }
                     };
+                    cell.emptyProperty().addListener(
+                            (obs, wasEmpty, isNowEmpty) ->{
+                                    if(isNowEmpty){
+                                        cell.setContextMenu(null);
+                                    }else {
+                                        cell.setContextMenu(listContextMenu);
+                                    }
+                            });
                     return cell;
                 }
             });
@@ -143,4 +165,15 @@ int i = 0;
     protected void onHelloButtonClick() {
         welcomeText.setText("Welcome to JavaFX Application!");
     }
+    public void deleteItem(TodoItem item){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Todo Item");
+        alert.setHeaderText("Delete item" + item.getShortDescription());
+        alert.setContentText("Are you sure? Press OK to confirm, or cancel");
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if(result.isPresent() && (result.get() == ButtonType.OK))
+            TodoData.getInstance().deleteTodoItem(item);
+            }
+
 }
