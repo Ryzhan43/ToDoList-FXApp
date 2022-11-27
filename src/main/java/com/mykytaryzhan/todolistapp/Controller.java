@@ -2,13 +2,17 @@ package com.mykytaryzhan.todolistapp;
 
 import datamodel.TodoData;
 import datamodel.TodoItem;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -97,7 +101,7 @@ int i = 0;
                                     setTextFill(Color.BROWN);
                                 }
                             }
-                            System.out.println("Update happened" + item);
+                            System.out.println("Update happened " + item);
                         }
                     };
                     cell.emptyProperty().addListener(
@@ -108,9 +112,20 @@ int i = 0;
                                         cell.setContextMenu(listContextMenu);
                                     }
                             });
+
                     return cell;
                 }
             });
+    }
+    @FXML
+    public void handleKeyPressed(KeyEvent keyEvent){
+        TodoItem selectedItem = todoListView.getSelectionModel().getSelectedItem();
+        if(selectedItem != null){
+            if(keyEvent.getCode().equals(KeyCode.DELETE)){
+                TodoData.getInstance().deleteTodoItem(selectedItem);
+            }
+        }
+
     }
 
     @FXML
@@ -174,6 +189,6 @@ int i = 0;
 
         if(result.isPresent() && (result.get() == ButtonType.OK))
             TodoData.getInstance().deleteTodoItem(item);
-            }
+    }
 
 }
